@@ -7,14 +7,25 @@ import (
 
 	ipns "github.com/ipfs/go-ipns"
 	crypto "github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/tse.lao/ipfs-user/ipfs"
+	"github.com/tse-lao/ipfs-user/ipfs"
 )
 
 func main() {
 	// createUserProfile("0xc94d737b36A32BbC4eaf545832C05420fa11B919")
+
+	//make sure the daemon is running on the launching process start
+	ipfs.RunDaemon()
+
+	fmt.Println("=== Shutting it all down ===")
+
+	ipfs.IpfsShutdown()
+}
+
+func creationProcess() {
 	fmt.Println("=== INITIALIZING THE IPFS ====")
 	ipfs.Init()
-	ipfs.GenKey("0xc94d737b36A32BbC4eaf545832C05420fa11B916")
+
+	ipfs.GenKey("0xc94d737b36A32BbC4eaf545832C05420fa11B919")
 	//returned this: k51qzi5uqu5dk4ap2b5ufp6qxibilq5wrj5omngnoezwyir6qvbzd6onxp9f91
 	ipfs.AllKeys()
 
@@ -29,10 +40,9 @@ func main() {
 	ipfs.CreateFolder("/newProfile", "notimplementedyet!")
 
 	// generatePrivates()
-
 }
 
-func generatePrivates() {
+func GeneratePrivates() {
 	privateKey, publicKey, err := crypto.GenerateKeyPair(crypto.RSA, 2048)
 
 	if err != nil {
@@ -50,7 +60,7 @@ func generatePrivates() {
 	fmt.Println(ipnsRecord, publicKey)
 }
 
-func createUserProfile(user_address string) {
+func CreateUserProfile(user_address string) {
 	//first we need to create a user profile
 	//which will be build based on user_address
 
