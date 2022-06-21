@@ -13,12 +13,15 @@ import (
 func main() {
 	// createUserProfile("0xc94d737b36A32BbC4eaf545832C05420fa11B919")
 
+	result := ipfs.RunDaemon()
+
+	fmt.Println(result)
 	//make sure the daemon is running on the launching process start
-	ipfs.RunDaemon()
+	/* ipfs.RunDaemon()
 
 	fmt.Println("=== Shutting it all down ===")
 
-	ipfs.IpfsShutdown()
+	ipfs.IpfsShutdown() */
 }
 
 func creationProcess() {
@@ -72,9 +75,6 @@ func CreateUserProfile(user_address string) {
 		fmt.Println("Something wrong with the creation of the profile:", err)
 	}
 
-	fmt.Println("We wrote the profile file, together with the addres")
-
-	fmt.Println("\n printing the init now")
 	//ipfs.Init()
 
 }

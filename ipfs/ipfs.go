@@ -1,25 +1,47 @@
 package ipfs
 
 import (
-	"bytes"
+	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
-	"sync"
 )
 
 func Init() {
 	//initialize ipfs locally'
 	out, err := exec.Command("ipfs", "init").Output()
+
+	//we need to ipfs init
 	if err != nil {
 		//TODO: Figure out a better way to display this error, because it is already initialized.
 		log.Println("Error at IPFS.go, func Init()", err)
 	}
-
 	fmt.Println(string(out))
 
+}
+
+func RunDaemon() interface{} {
+	daemon := make(chan string)
+	go StartDaemon(daemon)
+
+	//for now this is fine to create and start the daemon  on hte backed.
+
+	results := []interface{}{}
+	for {
+		msg := <-daemon
+		fmt.Println(msg)
+
+		results = append(results, msg)
+
+		if msg == "Daemon is ready" {
+			return results
+		}
+
+	}
+
+	results = append(results, "Error has been occured")
+	return results
 }
 
 func GenKey(address string) {
@@ -129,11 +151,10 @@ type Notification struct {
 	message string
 }
 
+//Shutdown the IPFS command for Daemon
 func IpfsShutdown() Notification {
 	result := Notification{}
-
 	cmdStruct := exec.Command("ipfs", "shutdown")
-
 	out, err := cmdStruct.Output()
 
 	if err != nil {
@@ -147,94 +168,40 @@ func IpfsShutdown() Notification {
 	return result
 }
 
-func RunDaemon() Notification {
-	result := Notification{}
+func StartDaemon(out chan string) {
 
-	//cmdStruct := exec.Command("ipfs", "daemon")
+	/*
+		[x] Create connecting and constantely report the changes made.
+		[x] Make sure the process is running on the background.
+		[x] Make sure that is all up and running.
+		[] Create a timeout, that can be triggered by the owner of the application.
+	*/
+
+	defer close(out)
 	cmd := exec.Command("ipfs", "daemon")
 
-	//out, err := cmdStruct.CombinedOutput()
+	cmdReader, _ := cmd.StdoutPipe()
+	scanner := bufio.NewScanner(cmdReader)
 
-	var errStdout, errStderr error
-	stdoutIn, _ := cmd.StdoutPipe()
-	stderrIn, _ := cmd.StderrPipe()
-	stdout := NewCapturingPassThroughWriter(os.Stdout)
-	stderr := NewCapturingPassThroughWriter(os.Stderr)
-	err := cmd.Start()
-	if err != nil {
-		log.Fatalf("cmd.Start() failed with '%s'\n", err)
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(1)
+	done := make(chan bool)
 
 	go func() {
-		_, errStdout = io.Copy(stdout, stdoutIn)
-		wg.Done()
+		for scanner.Scan() {
+			//This does work. But there is still something going on.
+			out <- scanner.Text()
+		}
+		done <- true
 	}()
 
-	_, errStderr = io.Copy(stderr, stderrIn)
-	wg.Wait()
+	cmd.Start()
+	<-done
+	err := cmd.Wait()
 
-	err = cmd.Wait()
 	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
-	}
-	if errStdout != nil || errStderr != nil {
-		log.Fatalf("failed to capture stdout or stderr\n")
-	}
-	outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-	fmt.Printf("\nout:\n%s\nerr:\n%s\n", outStr, errStr)
-
-	return result
-
-}
-
-type CapturingPassThroughWriter struct {
-	buf bytes.Buffer
-	w   io.Writer
-}
-
-// NewCapturingPassThroughWriter creates new CapturingPassThroughWriter
-func NewCapturingPassThroughWriter(w io.Writer) *CapturingPassThroughWriter {
-	return &CapturingPassThroughWriter{
-		w: w,
-	}
-}
-
-func (w *CapturingPassThroughWriter) Write(d []byte) (int, error) {
-	w.buf.Write(d)
-	return w.w.Write(d)
-}
-
-// Bytes returns bytes written to the writer
-func (w *CapturingPassThroughWriter) Bytes() []byte {
-	return w.buf.Bytes()
-}
-
-func copyAndCapute(w io.Writer, r io.Reader) ([]byte, error) {
-	var out []byte
-	buf := make([]byte, 1024, 1024)
-
-	for {
-		n, err := r.Read(buf[:])
-
-		if n > 0 {
-			d := buf[:n]
-			out = append(out, d...)
-			_, err := w.Write(d)
-
-			if err != nil {
-				return out, err
-			}
-		}
-		if err != nil {
-			//Read retinr io.OEF at the end of the file, which is not an error
-			if err == io.EOF {
-				err = nil
-			}
-			return out, err
-		}
+		fmt.Println(err)
+		out <- "We have closed the connection, because an error occured"
+		IpfsShutdown()
+		close(out)
 	}
 }
 
