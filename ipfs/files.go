@@ -10,6 +10,7 @@ import (
 )
 
 type FileStatus struct {
+	name           string
 	cid            string
 	size           int
 	cumulativeSize int
@@ -153,6 +154,7 @@ func ReadDirectoryAsList(path string, files []byte) []FileStatus {
 	for scanner.Scan() {
 		count++
 		filestatus := FileStat(path + "/" + scanner.Text())
+		filestatus.name = scanner.Text()
 		directory = append(directory, filestatus)
 	}
 	return directory
