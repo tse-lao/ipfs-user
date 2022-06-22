@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"log"
 	"os/exec"
 	"strconv"
 )
@@ -123,7 +124,7 @@ func RemoveFile(path string) (bool, string) {
 /*
 README: Read the directory should start with /
 */
-func ReadDirectory(path string) interface{} {
+func ReadDirectory(path string) []FileStatus {
 	if len(path) < 1 {
 		out, err := exec.Command("ipfs", "files", "ls").Output()
 		errorhandling(err)
@@ -133,7 +134,7 @@ func ReadDirectory(path string) interface{} {
 	}
 
 	if string(path[0]) != "/" {
-		return "Your path needs to start with /"
+		log.Fatal("not possible to do this, since it needs to start with /")
 	}
 
 	out, err := exec.Command("ipfs", "files", "ls", path).Output()
@@ -142,12 +143,12 @@ func ReadDirectory(path string) interface{} {
 	return result
 }
 
-func ReadDirectoryAsList(path string, files []byte) interface{} {
+func ReadDirectoryAsList(path string, files []byte) []FileStatus {
 	reader := bytes.NewReader(files)
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanWords)
 
-	directory := []interface{}{}
+	var directory []FileStatus
 	count := 0
 	for scanner.Scan() {
 		count++
