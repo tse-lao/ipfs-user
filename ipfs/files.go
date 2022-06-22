@@ -10,12 +10,12 @@ import (
 )
 
 type FileStatus struct {
-	name           string `json:"name"`
-	cid            string `json:"cat"`
-	size           int    `json:"size"`
-	cumulativeSize int    `json:"cumlativeSize"`
-	childBlocks    int    `json:"childBlocks"`
-	fileType       string `json:"fileType"`
+	Name           string `json:"name"`
+	Cid            string `json:"cat"`
+	Size           int    `json:"size"`
+	CumulativeSize int    `json:"cumlativeSize"`
+	ChildBlocks    int    `json:"childBlocks"`
+	FileType       string `json:"fileType"`
 }
 
 func errorhandling(err error) {
@@ -153,7 +153,7 @@ func ReadDirectoryAsList(path string, files []byte) []FileStatus {
 	for scanner.Scan() {
 		count++
 		filestatus := FileStat(path + "/" + scanner.Text())
-		filestatus.name = scanner.Text()
+		filestatus.Name = scanner.Text()
 		directory = append(directory, filestatus)
 	}
 	return directory
@@ -177,18 +177,18 @@ func FileStat(path string) FileStatus {
 	for scanner.Scan() {
 		switch counter {
 		case 0:
-			status.cid = scanner.Text()
+			status.Cid = scanner.Text()
 		case 2:
 			integer, _ := strconv.Atoi(scanner.Text())
-			status.size = integer
+			status.Size = integer
 		case 4:
 			integer, _ := strconv.Atoi(scanner.Text())
-			status.cumulativeSize = integer
+			status.CumulativeSize = integer
 		case 6:
 			integer, _ := strconv.Atoi(scanner.Text())
-			status.childBlocks = integer
+			status.ChildBlocks = integer
 		case 8:
-			status.fileType = scanner.Text()
+			status.FileType = scanner.Text()
 		}
 		counter++
 	}
