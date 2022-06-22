@@ -116,7 +116,6 @@ func RemoveFile(path string) (bool, string) {
 		return false, "unable to remove the file, file does not exists"
 	}
 
-	fmt.Println("succesfully removed the file", out)
 	return true, "succesfully removed the file"
 
 }

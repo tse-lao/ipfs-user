@@ -14,8 +14,8 @@ func main() {
 	// createUserProfile("0xc94d737b36A32BbC4eaf545832C05420fa11B919")
 
 	/*
-		[] Find files
-		[] display as an array.
+		[x] Find files
+		[x] display as an array.
 
 	*/
 
