@@ -13,15 +13,23 @@ import (
 func main() {
 	// createUserProfile("0xc94d737b36A32BbC4eaf545832C05420fa11B919")
 
-	result := ipfs.RunDaemon()
+	/*
+		[] Find files
+		[] display as an array.
 
-	fmt.Println(result)
-	//make sure the daemon is running on the launching process start
-	/* ipfs.RunDaemon()
+	*/
 
-	fmt.Println("=== Shutting it all down ===")
+	const movefile = "/Users/koenschuite/Documents/pasfoto.png"
 
-	ipfs.IpfsShutdown() */
+	//ipfs.AddFile(movefile, "/newPassfoto.png")
+
+	result := ipfs.ReadDirectory("")
+	file := ipfs.ReadFile("/pasfoto.png")
+	fmt.Println(file)
+	fmt.Println("Result : " + result)
+
+	//remove v=file
+	ipfs.RemoveFile("/newPassfoto.png")
 }
 
 func creationProcess() {
@@ -34,15 +42,19 @@ func creationProcess() {
 
 	// TODO: Check if the profile is working and running.
 	fmt.Println("=== FIND THE NEW PROFILES ====")
-	ipfs.FindItems("/newProfile")
-
-	//TODO: Not implemented yet..
-	ipfs.CheckFolder("")
+	ipfs.ReadDirectory("/newProfile")
 
 	//TODO: This is not implementated yet.
-	ipfs.CreateFolder("/newProfile", "notimplementedyet!")
+	ipfs.CreateFolder("/newProfile")
 
 	// generatePrivates()
+
+	/*
+		DAEMON RUNNING
+		[]fix error so it won't crash
+		result := ipfs.RunDaemon()
+		fmt.Println(result)
+	*/
 }
 
 func GeneratePrivates() {
