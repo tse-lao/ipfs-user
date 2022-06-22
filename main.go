@@ -24,12 +24,13 @@ func main() {
 	//ipfs.AddFile(movefile, "/newPassfoto.png")
 
 	result := ipfs.ReadDirectory("")
-	file := ipfs.ReadFile("/pasfoto.png")
+	fmt.Println(result)
+	/* file := ipfs.ReadFile("/pasfoto.png")
 	fmt.Println(file)
 	fmt.Println("Result : " + result)
 
 	//remove v=file
-	ipfs.RemoveFile("/newPassfoto.png")
+	ipfs.RemoveFile("/newPassfoto.png") */
 }
 
 func creationProcess() {

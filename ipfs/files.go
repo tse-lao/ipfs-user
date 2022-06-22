@@ -1,9 +1,21 @@
 package ipfs
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"os/exec"
+	"strconv"
 )
+
+type FileStatus struct {
+	cid            string
+	size           int
+	cumulativeSize int
+	childBlocks    int
+	fileType       string
+	dir            bool
+}
 
 func errorhandling(err error) {
 	if err != nil {
@@ -91,6 +103,9 @@ func ReadFile(path string) []byte {
 	return out
 }
 
+/*
+README:
+*/
 func RemoveFile(path string) (bool, string) {
 	cdmStruct := exec.Command("ipfs", "files", "rm", path)
 	out, err := cdmStruct.Output()
@@ -106,14 +121,15 @@ func RemoveFile(path string) (bool, string) {
 }
 
 /*
-README: Read the directoi
+README: Read the directory should start with /
 */
-func ReadDirectory(path string) string {
+func ReadDirectory(path string) interface{} {
 	if len(path) < 1 {
 		out, err := exec.Command("ipfs", "files", "ls").Output()
 		errorhandling(err)
 
-		return string(out)
+		result := ReadDirectoryAsList(path, out)
+		return result
 	}
 
 	if string(path[0]) != "/" {
@@ -122,6 +138,57 @@ func ReadDirectory(path string) string {
 
 	out, err := exec.Command("ipfs", "files", "ls", path).Output()
 	errorhandling(err)
+	result := ReadDirectoryAsList(path, out)
+	return result
+}
 
-	return string(out)
+func ReadDirectoryAsList(path string, files []byte) interface{} {
+	reader := bytes.NewReader(files)
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanWords)
+
+	directory := []interface{}{}
+	count := 0
+	for scanner.Scan() {
+		count++
+		filestatus := FileStat(path + "/" + scanner.Text())
+		directory = append(directory, filestatus)
+	}
+	return directory
+}
+
+func FileStat(path string) FileStatus {
+	status := FileStatus{}
+
+	out, err := exec.Command("ipfs", "files", "stat", path).Output()
+
+	if err != nil {
+		fmt.Println("error occured in FileStat", err)
+		return status
+	}
+
+	reader := bytes.NewReader(out)
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanWords)
+
+	counter := 0
+	for scanner.Scan() {
+		switch counter {
+		case 0:
+			status.cid = scanner.Text()
+		case 2:
+			integer, _ := strconv.Atoi(scanner.Text())
+			status.size = integer
+		case 4:
+			integer, _ := strconv.Atoi(scanner.Text())
+			status.cumulativeSize = integer
+		case 6:
+			integer, _ := strconv.Atoi(scanner.Text())
+			status.childBlocks = integer
+		case 8:
+			status.fileType = scanner.Text()
+		}
+		counter++
+	}
+	return status
 }
