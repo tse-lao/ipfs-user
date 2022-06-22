@@ -110,11 +110,12 @@ README:
 func RemoveFile(path string) (bool, string) {
 	cdmStruct := exec.Command("ipfs", "files", "rm", path)
 	out, err := cdmStruct.Output()
-
+	fmt.Println(out)
 	if err != nil {
 		fmt.Println("unable to remove the file", err)
 		return false, "unable to remove the file, file does not exists"
 	}
+	fmt.Println(out)
 
 	return true, "succesfully removed the file"
 
