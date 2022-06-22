@@ -10,13 +10,12 @@ import (
 )
 
 type FileStatus struct {
-	name           string
-	cid            string
-	size           int
-	cumulativeSize int
-	childBlocks    int
-	fileType       string
-	dir            bool
+	name           string `json:"name"`
+	cid            string `json:"cat"`
+	size           int    `json:"size"`
+	cumulativeSize int    `json:"cumlativeSize"`
+	childBlocks    int    `json:"childBlocks"`
+	fileType       string `json:"fileType"`
 }
 
 func errorhandling(err error) {
