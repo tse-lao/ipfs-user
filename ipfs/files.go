@@ -3,10 +3,13 @@ package ipfs
 import (
 	"bufio"
 	"bytes"
+	"crypto/ecdsa"
 	"fmt"
 	"log"
 	"os/exec"
 	"strconv"
+
+	"github.com/tse-lao/ether-user/wallet"
 )
 
 type FileStatus struct {
@@ -16,6 +19,13 @@ type FileStatus struct {
 	CumulativeSize int    `json:"cumlativeSize"`
 	ChildBlocks    int    `json:"childBlocks"`
 	FileType       string `json:"fileType"`
+}
+
+type FileData struct {
+	Owner string `json:"owner"`
+	Data  []byte `json:"data"`
+	Time  string `json:"data_added"`
+	Type  string `json:"type_doc"`
 }
 
 func errorhandling(err error) {
@@ -30,16 +40,18 @@ Make sure you implement the currect path to create a directory.
 func CreateFolder(folder_name string) (bool, string) {
 	//check if the path string starts with a slash
 	if folder_name[0:1] != "/" {
+		fmt.Println("First Character needs tot start wtih /")
 		return false, "The first character should be equal to /"
 	}
 
-	cmdStruct := exec.Command("ipfs", "files", "mkdir", folder_name)
+	cmdStruct := exec.Command("ipfs", "files", "mkdir", "-p", folder_name)
 	out, err := cmdStruct.Output()
 
 	if err != nil {
 		fmt.Println(err)
 		return false, "An error occured with creating the a folder"
 	}
+
 	fmt.Println(string(out))
 
 	return true, "succesfully created the directory"
@@ -60,16 +72,21 @@ func MoveFile(currentPath, newPath string) (bool, string) {
 }
 
 //moves the path.
-func AddFile(currentPath, newPath string) (bool, string) {
+func AddFile(currentPath, newPath string, publicKey *ecdsa.PublicKey) (bool, string) {
 	//read the data before we can add it
+	result := ReadFile(currentPath)
 
-	//moves the file to different path.
-	// we cannot do this.
-	cmdStruct := exec.Command("ipfs", "files", "write", "--create", newPath, currentPath)
+	encryptedData := wallet.EncryptWithPublicKey(publicKey, result)
+
+	//returned the encrypted data, now need to write this byte format into something with teh right stats.
+	//create metadata for this.
+	fmt.Println(encryptedData)
+	cmdStruct := exec.Command("ipfs", "files", "write", "-p", "--create", newPath, currentPath)
 
 	out, err := cmdStruct.Output()
 
 	if err != nil {
+		fmt.Println("Error occured when moving it to the right path. ")
 		fmt.Println(err)
 	}
 
@@ -101,6 +118,8 @@ func ReadFile(path string) []byte {
 		fmt.Println("error occured while reading ")
 	}
 	//	cmdStruct := exec.Command
+
+	fmt.Println(out)
 	return out
 }
 

@@ -11,17 +11,31 @@ import (
 )
 
 func main() {
+	//var pathlink string = "/Users/koenschuite/Desktop/facebook-koenschuite/comments_and_reactions/comments.json"
+
+	//ipfs.AddFile(pathlink, "newlycreated/newtry.json")
+
+	const pathName = "/Users/koenschuite/Desktop/facebook-koenschuite"
+	const fileName = "/facebook-data/activity_messages"
+
+	ipfs.CreateFolder(fileName)
+
+	//result := ipfs.ReadAllSubDirectories(pathName)
+
+	//ipfs.CreateMetaDataFile(result, pathName, fileName)
+
+}
+
+func TestingAddFile() {
 	// createUserProfile("0xc94d737b36A32BbC4eaf545832C05420fa11B919")
 
 	/*
 		[x] Find files
 		[x] display as an array.
-
 	*/
-
 	const movefile = "/Users/koenschuite/Documents/pasfoto.png"
 
-	//ipfs.AddFile(movefile, "/newPassfoto.png")
+	ipfs.AddFile(movefile, "/newimage.png")
 
 	result := ipfs.ReadDirectory("")
 	fmt.Println(result)
