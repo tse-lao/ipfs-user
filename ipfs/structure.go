@@ -151,7 +151,10 @@ func moveArrayOfFiles(paths []string, name string) string {
 		var namePath string = name + path
 		var newName string = path
 		fmt.Println(namePath)
-		AddFile(namePath, newName)
+		fmt.Println(newName)
+
+		//TODO:[] here we need to add the encryption for the file.. one by one.
+		//AddFile(namePath, newName, )
 	}
 
 	return "we have uploaded all to ipfs"

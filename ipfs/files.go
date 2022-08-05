@@ -3,7 +3,6 @@ package ipfs
 import (
 	"bufio"
 	"bytes"
-	"crypto/ecdsa"
 	"fmt"
 	"log"
 	"os/exec"
@@ -71,16 +70,60 @@ func MoveFile(currentPath, newPath string) (bool, string) {
 	return false, string(out)
 }
 
-//moves the path.
-func AddFile(currentPath, newPath string, publicKey *ecdsa.PublicKey) (bool, string) {
+func UploadToIPFS(currentPath string) (bool, string) {
+	cmdStruct := exec.Command("ipfs", "add", currentPath)
+	out, err := cmdStruct.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(string(out))
+
+	return true, string(out)
+}
+
+func DownloadFromIPFS(path string) (bool, string) {
+	cmdStruct := exec.Command("ipfs", "get", path)
+	out, err := cmdStruct.Output()
+
+	if err != nil {
+		return false, err.Error()
+	}
+
+	return true, string(out)
+}
+
+func AddFile(currentPath, newPath string) (bool, string) {
+	//read the data before we can add itr
+
+	cmdStruct := exec.Command("ipfs", "files", "write", "-p", "--create", newPath, currentPath)
+
+	out, err := cmdStruct.Output()
+
+	if err != nil {
+		fmt.Println("Error occured when moving it to the right path. ")
+		fmt.Println(err)
+	}
+
+	fmt.Println(out)
+
+	return true, "succesfully implemented"
+}
+
+//addEncr
+func PrivateFileAdd(currentPath, newPath, password string) (bool, string) {
 	//read the data before we can add it
 	result := ReadFile(currentPath)
 
-	encryptedData := wallet.EncryptWithPublicKey(publicKey, result)
+	// publicKey *ecdsa.PublicKey
+
+	encryptedData := wallet.DecryptWithPrivateKey(password, result)
 
 	//returned the encrypted data, now need to write this byte format into something with teh right stats.
 	//create metadata for this.
 	fmt.Println(encryptedData)
+
 	cmdStruct := exec.Command("ipfs", "files", "write", "-p", "--create", newPath, currentPath)
 
 	out, err := cmdStruct.Output()
@@ -115,6 +158,7 @@ func ReadFile(path string) []byte {
 	out, err := exec.Command("ipfs", "files", "read", path).Output()
 
 	if err != nil {
+		//still an error that needs to be tackled. when reading file.
 		fmt.Println("error occured while reading ")
 	}
 	//	cmdStruct := exec.Command
@@ -212,4 +256,16 @@ func FileStat(path string) FileStatus {
 		counter++
 	}
 	return status
+}
+
+func WriteToIPFS(data string) {
+	cdmStruct := exec.Command("ipfs", "dag", "put", data)
+
+	out, err := cdmStruct.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(out)
 }
