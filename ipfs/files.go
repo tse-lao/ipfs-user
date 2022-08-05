@@ -47,7 +47,7 @@ func CreateFolder(folder_name string) (bool, string) {
 	out, err := cmdStruct.Output()
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 		return false, "An error occured with creating the a folder"
 	}
 
@@ -75,7 +75,9 @@ func UploadToIPFS(currentPath string) (bool, string) {
 	out, err := cmdStruct.Output()
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
+
+		return false, err.Error()
 	}
 
 	fmt.Println(string(out))
